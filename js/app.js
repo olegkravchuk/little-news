@@ -1,4 +1,4 @@
-var photos = ['images/cat.jpg','images/dog.jpg','images/owl.jpg'];
+window.ee = new EventEmitter();
 
 var news = [
     {   id: 0,
@@ -111,7 +111,17 @@ var AddNew = React.createClass({
         //  alert(this.state.myValue)
         //  console.log(this.refs);
         e.preventDefault();
-        alert(ReactDOM.findDOMNode(this.refs.author).value + '\n' + ReactDOM.findDOMNode(this.refs.text).value)
+        var item = [{
+            id: Math.floor((Math.random() * 1000000) + 1),
+            author: ReactDOM.findDOMNode(this.refs.author).value,
+            text: ReactDOM.findDOMNode(this.refs.text).value,
+            bigText: '...'
+        }];
+        window.ee.emit('News.add', item);
+        ReactDOM.findDOMNode(this.refs.text).value = '';
+        this.setState({
+            textIsEmpty: true
+        });
     },
     onCheckRuleClick: function(e){
         //ReactDOM.findDOMNode(this.refs.alert_button).disabled = !e.target.checked;
@@ -146,10 +156,16 @@ var App = React.createClass({
         }
     },
     componentDidMount: function() {
-
+        var self = this;
+        window.ee.addListener('News.add', function(item){
+            var nextNews = item.concat(self.state.news);
+            self.setState({
+                news: nextNews
+            })
+        })
     },
     componentWillUnmount: function() {
-
+        window.ee.removeListener('News.add');
     },
     render: function () {
         return (
